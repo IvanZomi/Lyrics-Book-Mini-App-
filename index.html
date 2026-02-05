@@ -315,7 +315,7 @@
     <script>
         // ================= CONFIGURATION =================
         // 🔥 အရေးကြီးသည် : Google Apps Script URL ကို ဒီမှာထည့်ပါ
-        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbydcIxjZrQzRKJ6rubYpLa7b31G9eqrQ2sOQgSMukdJceLAqzXAMeW1sRJv_Xq1-JUw/exec"; 
+        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyGsyP1q6VnrknrUt6X89r41obbtMHbGlO4n4KIig9kE3Ojw0cR21yLDBmAKPX9JTof/exec"; 
         
         // Dummy Data for testing
         const DUMMY_DATA = [
@@ -528,12 +528,11 @@
         }
 
         function shareLyrics() {
-             if (navigator.share) {
-                navigator.share({ title: 'Lyrics', text: currentLyrics });
-            } else {
-                alert("https://t.me/ZomilabuBot");
-            }
-        }
+    // Link ကို Clipboard ထဲ ကူးပေးမယ့် ကုဒ်
+    navigator.clipboard.writeText("https://t.me/ZomilabuBot").then(() => {
+        alert("Bot Link Copied! ");
+    });
+}
 
         function updateFavIcon(id) {
             const icon = document.getElementById('fav-icon');
