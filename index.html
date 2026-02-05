@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lyrics Book</title>
+    <title>Lamal Book</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -15,12 +15,14 @@
             --lyrics-font-size: 16px; 
         }
 
+        /* Dark Mode Support */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #1c1c1e;
                 --text-color: #ffffff;
                 --secondary-bg: #2c2c2e;
             }
+
         }
 
         body {
@@ -34,6 +36,7 @@
             user-select: none;
         }
 
+        /* Screen Management */
         .screen {
             display: none;
             height: 100%;
@@ -50,6 +53,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Header */
         .header {
             padding: 15px;
             background: var(--secondary-bg);
@@ -71,6 +75,7 @@
             align-items: center;
         }
 
+        /* Search & Categories */
         .search-container {
             padding: 10px;
         }
@@ -106,6 +111,7 @@
             color: white;
         }
 
+        /* List View */
         .list-container {
             flex: 1;
             overflow-y: auto;
@@ -123,6 +129,7 @@
             background-color: rgba(0,0,0,0.05);
         }
 
+        /* Lyrics View */
         .lyrics-content {
             flex: 1;
             padding: 20px;
@@ -131,7 +138,7 @@
             font-size: var(--lyrics-font-size);
             line-height: 1.8;
             text-align: center;
-            user-select: text;
+            user-select: text; /* Copy ကူးလို့ရအောင် */
         }
 
         .bottom-actions {
@@ -157,6 +164,7 @@
             color: var(--primary-color);
         }
 
+        /* Loading & Toast */
         #loading {
             position: fixed;
             top: 50%;
@@ -184,16 +192,20 @@
             display: none;
         }
 
+        .settings-content, .about-content { padding: 20px; }
+        input[type=range] { width: 100%; margin-top: 20px; }
+
     </style>
 </head>
 <body>
 
     <div id="loading">Tawmvei ngak in...</div>
+    
     <div id="offline-toast" class="toast">Offline Mode</div>
 
     <div id="home-screen" class="screen">
         <div class="header">
-            <span>Lamal Bu</span>
+            <span>Lamal Book</span>
             <div style="display: flex; gap: 10px;">
                 <button class="icon-btn" onclick="showFavoritesScreen()">
                     <span class="material-icons" style="color: #ff4081;">favorite</span>
@@ -205,12 +217,12 @@
         </div>
         
         <div class="search-container">
-            <input type="text" id="search-input" class="search-bar" placeholder="Lamal zong in..." onkeyup="filterSongs()">
+            <input type="text" id="search-input" class="search-bar" placeholder="La thulu zong in..." onkeyup="filterSongs()">
         </div>
 
         <div class="category-scroll" id="category-list">
             <div class="category-chip active" onclick="filterCategory('All', this)">All</div>
-        </div>
+            </div>
 
         <div class="list-container" id="song-list">
             </div>
@@ -257,11 +269,14 @@
             <span>My Favorites</span>
             <span style="width: 24px;"></span>
         </div>
+        
         <div id="no-fav-msg" style="text-align: center; margin-top: 50px; display: none; color: #888;">
             <span class="material-icons" style="font-size: 48px; color: #ddd;">favorite_border</span>
             <p>No favorites yet!</p>
         </div>
-        <div class="list-container" id="fav-list"></div>
+
+        <div class="list-container" id="fav-list">
+            </div>
     </div>
 
     <div id="settings-screen" class="screen">
@@ -276,49 +291,93 @@
             <h3>Text Size</h3>
             <input type="range" min="14" max="30" value="16" id="font-slider" oninput="changeFontSize(this.value)">
             <p>Preview: <span id="font-val">16px</span></p>
+            <p class="lyrics-text" style="border:1px dashed #ccc; padding:10px;">Laimal Golna bawl in</p>
         </div>
     </div>
 
     <div id="about-screen" class="screen">
-        <div class="header"><button class="icon-btn" onclick="showScreen('home-screen')"><span class="material-icons">close</span></button><span>About</span><span style="width: 24px;"></span></div>
-        <div class="about-content" style="text-align: center;"><h2>Lamal Bu</h2>
-            <p>Version 1.0.2 (Offline Support)</p>
-            <br>
+        <div class="header">
+            <button class="icon-btn" onclick="showScreen('home-screen')">
+                <span class="material-icons">close</span>
+            </button>
+            <span>About</span>
+            <span style="width: 24px;"></span>
+        </div>
+        <div class="about-content" style="text-align: center;">
+            <h2>Lyrics Mini App</h2>
+            <p>Version 1.2</p>
             <p>Developed with ❤️ by</p>
-            <h3>Ivan Zomi</h3>
-            <p>Late 150:1-6</p>
+            <h3>Ivan Zomi</h3>
+            <p>Late 150:1-6</p>
+
         </div>
     </div>
+
     <script>
-        // 🔥 မမေ့ပါနဲ့ : API URL ထည့်ပါ
-        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyGsyP1q6VnrknrUt6X89r41obbtMHbGlO4n4KIig9kE3Ojw0cR21yLDBmAKPX9JTof/exec"; 
+        // ================= CONFIGURATION =================
+        // 🔥 အရေးကြီးသည် : Google Apps Script URL ကို ဒီမှာထည့်ပါ
+        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbydcIxjZrQzRKJ6rubYpLa7b31G9eqrQ2sOQgSMukdJceLAqzXAMeW1sRJv_Xq1-JUw/exec"; 
         
+        // Dummy Data for testing
+        const DUMMY_DATA = [
+            {category: "Rock", title: "အိမ်မက် (လေးဖြူ)", subtitle: "", lyrics: "အိမ်မက် ....\nဒါဟာ အိမ်မက်တစ်ခုပါ..."},
+            {category: "Pop", title: "သူငယ်ချင်း (စိုင်းစိုင်း)", subtitle: "", lyrics: "သူငယ်ချင်း....\nတို့တွေ ဝေးသွားကြရင်..."},
+        ];
+
+        // ================= STATE VARIABLES =================
         let allData = [];
         let historyStack = ['home-screen'];
         let currentLyrics = "";
         let favorites = JSON.parse(localStorage.getItem('favs')) || [];
 
+        // ================= INITIALIZATION =================
         window.onload = async function() {
-            if (window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.expand(); 
+            // Telegram WebApp Full Screen
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.expand(); 
+            }
+
+            const loadingEl = document.getElementById('loading');
+            
+            // 1. Load from Cache (Offline Support)
             const cachedData = localStorage.getItem('offlineData');
             if (cachedData) {
+                console.log("Loading from cache...");
                 allData = JSON.parse(cachedData);
-                initApp();
+                initApp(); 
             }
+
+            // 2. Fetch from Internet
             if (SHEET_API_URL !== "") {
                 try {
                     const response = await fetch(SHEET_API_URL);
+                    if (!response.ok) throw new Error("Network error");
+                    
                     const newData = await response.json();
+                    
+                    // Update Cache
                     localStorage.setItem('offlineData', JSON.stringify(newData));
                     allData = newData;
+                    
                     initApp();
+                    loadingEl.style.display = 'none';
+
                 } catch (e) {
-                    document.getElementById('loading').style.display = 'none';
+                    console.warn("Offline or Error:", e);
+                    loadingEl.style.display = 'none';
                     if (cachedData) showOfflineToast();
+                    else {
+                        allData = DUMMY_DATA;
+                        initApp();
+                    }
                 }
             } else {
-                document.getElementById('loading').style.display = 'none';
-                if(!cachedData) alert("Please set API URL");
+                console.warn("No API URL");
+                loadingEl.style.display = 'none';
+                if (!cachedData) {
+                    allData = DUMMY_DATA;
+                    initApp();
+                }
             }
         };
 
@@ -329,18 +388,47 @@
         }
 
         function initApp() {
-            document.getElementById('loading').style.display = 'none';
             setupCategories();
             renderSongs(allData);
             
+            // Load saved font size
             const savedSize = localStorage.getItem('fontSize') || 16;
             changeFontSize(savedSize);
+            document.getElementById('font-slider').value = savedSize;
         }
 
+        // ================= NAVIGATION =================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            if (screenId === 'home-screen') historyStack = ['home-screen'];
+            else historyStack.push(screenId);
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop();
+                // If popping returns us to current screen (duplicate), pop again
+                if (historyStack[historyStack.length - 1] === document.querySelector('.screen.active').id) {
+                     historyStack.pop();
+                }
+                // Show the previous screen
+                let prevScreen = historyStack[historyStack.length - 1] || 'home-screen';
+                
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(prevScreen).classList.add('active');
+            } else {
+                showScreen('home-screen');
+            }
+        }
+
+        // ================= LOGIC: HOME (SONGS) =================
         function setupCategories() {
             const categories = ['All', ...new Set(allData.map(item => item.category))];
             const catContainer = document.getElementById('category-list');
             catContainer.innerHTML = '';
+            
             categories.forEach(cat => {
                 let chip = document.createElement('div');
                 chip.className = `category-chip ${cat === 'All' ? 'active' : ''}`;
@@ -357,10 +445,18 @@
         function renderSongs(data) {
             const list = document.getElementById('song-list');
             list.innerHTML = '';
+            
             data.forEach(song => {
                 let div = document.createElement('div');
                 div.className = 'list-item';
-                div.innerHTML = `<div><div style="font-weight:bold;">${song.title}</div><div style="font-size:12px; opacity:0.6;">${song.category}</div></div><span class="material-icons" style="font-size:16px; color:#ccc;">chevron_right</span>`;
+                // Using 'title' from Google Sheet as Song Name
+                div.innerHTML = `
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:bold;">${song.title}</span>
+                        <span style="font-size:12px; color:#888;">${song.category}</span>
+                    </div>
+                    <span class="material-icons" style="font-size:16px; color:#ccc;">chevron_right</span>
+                `;
                 div.onclick = () => showLyrics(song);
                 list.appendChild(div);
             });
@@ -369,40 +465,59 @@
         function filterCategory(category) {
             const searchVal = document.getElementById('search-input').value.toLowerCase();
             let filtered = allData;
-            if (category !== 'All') filtered = filtered.filter(item => item.category === category);
-            if (searchVal) filtered = filtered.filter(item => item.title.toLowerCase().includes(searchVal));
+            
+            if (category !== 'All') {
+                filtered = filtered.filter(item => item.category === category);
+            }
+            if (searchVal) {
+                filtered = filtered.filter(item => item.title.toLowerCase().includes(searchVal));
+            }
             renderSongs(filtered);
         }
 
         function filterSongs() {
             const activeChip = document.querySelector('.category-chip.active');
-            filterCategory(activeChip ? activeChip.innerText : 'All');
+            const activeCat = activeChip ? activeChip.innerText : 'All';
+            filterCategory(activeCat);
         }
 
+        // ================= LOGIC: LYRICS =================
         function showLyrics(song) {
             document.getElementById('playing-song-title').innerText = song.title;
             document.getElementById('lyrics-text').innerText = song.lyrics;
             currentLyrics = song.lyrics;
+            
             updateFavIcon(song.title);
             document.querySelector('.action-btn').setAttribute('data-id', song.title);
+            
             showScreen('lyrics-screen');
         }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            if (screenId === 'home-screen') historyStack = ['home-screen'];
-            else historyStack.push(screenId);
+        // ================= LOGIC: FAVORITES =================
+        function showFavoritesScreen() {
+            favorites = JSON.parse(localStorage.getItem('favs')) || [];
+            const favSongs = allData.filter(song => favorites.includes(song.title));
+            
+            const list = document.getElementById('fav-list');
+            list.innerHTML = '';
+            document.getElementById('no-fav-msg').style.display = favSongs.length ? 'none' : 'block';
+
+            favSongs.forEach(song => {
+                let div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:bold;">${song.title}</span>
+                    </div>
+                    <span class="material-icons" style="color: #ff4081;">favorite</span>
+                `;
+                div.onclick = () => showLyrics(song);
+                list.appendChild(div);
+            });
+            showScreen('favorites-screen');
         }
 
-        function goBack() {
-            if (historyStack.length > 1) {
-                historyStack.pop();
-                showScreen(historyStack.pop());
-            }
-        }
-
-        // Favorites, Font Size, Share, Copy (ကျန်တာတွေ အရင်အတိုင်း)
+        // ================= UTILITIES =================
         function changeFontSize(size) {
             document.documentElement.style.setProperty('--lyrics-font-size', size + 'px');
             document.getElementById('font-val').innerText = size + 'px';
@@ -414,39 +529,40 @@
         }
 
         function shareLyrics() {
-            if (navigator.share) navigator.share({title: 'Lyrics', text: currentLyrics});
+             if (navigator.share) {
+                navigator.share({ title: 'Lyrics', text: currentLyrics });
+            } else {
+                alert("https://t.me/ZomilabuBot");
+            }
         }
 
         function updateFavIcon(id) {
             const icon = document.getElementById('fav-icon');
             favorites = JSON.parse(localStorage.getItem('favs')) || [];
-            icon.innerText = favorites.includes(id) ? "favorite" : "favorite_border";
-            icon.style.color = favorites.includes(id) ? "#ff4081" : "var(--text-color)";
+            if (favorites.includes(id)) {
+                icon.innerText = "favorite";
+                icon.style.color = "#ff4081";
+            } else {
+                icon.innerText = "favorite_border";
+                icon.style.color = "var(--text-color)";
+            }
         }
 
         function toggleFavorite() {
             const id = document.querySelector('.action-btn').getAttribute('data-id');
+            const icon = document.getElementById('fav-icon');
             favorites = JSON.parse(localStorage.getItem('favs')) || [];
-            if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
-            else favorites.push(id);
+            
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(fav => fav !== id);
+                icon.innerText = "favorite_border";
+                icon.style.color = "var(--text-color)";
+            } else {
+                favorites.push(id);
+                icon.innerText = "favorite";
+                icon.style.color = "#ff4081";
+            }
             localStorage.setItem('favs', JSON.stringify(favorites));
-            updateFavIcon(id);
-        }
-
-        function showFavoritesScreen() {
-            favorites = JSON.parse(localStorage.getItem('favs')) || [];
-            const favSongs = allData.filter(s => favorites.includes(s.title));
-            const list = document.getElementById('fav-list');
-            list.innerHTML = '';
-            document.getElementById('no-fav-msg').style.display = favSongs.length ? 'none' : 'block';
-            favSongs.forEach(song => {
-                let div = document.createElement('div');
-                div.className = 'list-item';
-                div.innerHTML = `<div><div style="font-weight:bold;">${song.title}</div></div>`;
-                div.onclick = () => showLyrics(song);
-                list.appendChild(div);
-            });
-            showScreen('favorites-screen');
         }
     </script>
 </body>
