@@ -157,7 +157,7 @@
         </div>
         <div class="about-content" style="text-align: center;">
             <h2>Lyrics Mini App</h2>
-            <p>Version 1.2</p>
+            <p>Version 1.3</p>
             <p>Developed with ❤️ by</p>
             <h3>Ivan Zomi</h3>
             <p>Late 150:1-6</p>
@@ -166,15 +166,10 @@
 
     <script>
         // =======================================================
-        // 🔥 အောက်ပါ "" ကြားထဲမှာ Google Apps Script URL ထည့်ပါ
+        // ✅ API URL ကို ထည့်ပြီးသားပါ (ဘာမှထပ်ပြင်စရာမလိုပါ)
         // =======================================================
         const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbz8CwDNQK0t-x106TuCv6sOjPtuwge9T_JmB77OeQAWZLtPhVNoxLL-5iXxJhKcSaVtLA/exec"; 
         
-        // Dummy Data (API Link မှားနေရင် ဒါတွေပေါ်နေပါလိမ့်မယ်)
-        const DUMMY_DATA = [
-            {category: "Info", title: "API Link မထည့်ရသေးပါ", subtitle: "", lyrics: "GitHub Code ထဲတွင် API Link ထည့်ရန် လိုအပ်ပါသည်။"},
-        ];
-
         let allData = [];
         let historyStack = ['home-screen'];
         let currentLyrics = "";
@@ -185,91 +180,52 @@
                 window.Telegram.WebApp.expand(); 
             }
 
-            const loadingEl = document.getElementById('loading');
-            
-            // 1. Load from Cache (Offline Support)
+            // 1. Cache က Data ကို အရင်ပြထားမယ် (Offline အတွက်)
             const cachedData = localStorage.getItem('offlineData');
             if (cachedData) {
-                console.log("Loading from cache...");
                 allData = JSON.parse(cachedData);
-                initApp(); 
+                initApp();
             }
 
-            // 2. Fetch from Internet
-            if (SHEET_API_URL && SHEET_API_URL.startsWith("http")) {
+            // 2. အင်တာနက်ကနေ Data အသစ်ဆွဲမယ်
+            if (SHEET_API_URL) {
                 try {
                     const response = await fetch(SHEET_API_URL);
-                    if (!response.ok) throw new Error("Network error");
-                    
                     const newData = await response.json();
                     
-                    if(newData.error) {
-                        alert("Sheet Error: " + newData.error);
-                    } else {
+                    // JSON ရလာရင် Cache သိမ်းပြီး UI Update လုပ်မယ်
+                    if (newData && Array.isArray(newData)) {
                         localStorage.setItem('offlineData', JSON.stringify(newData));
                         allData = newData;
                         initApp();
-                        loadingEl.style.display = 'none';
-                    }
-
+                    } 
                 } catch (e) {
-                    console.warn("Offline or Error:", e);
-                    loadingEl.style.display = 'none';
+                    console.error("Network Error:", e);
+                    // Error တက်ရင် Loading ပိတ်မယ်
+                    document.getElementById('loading').style.display = 'none';
                     if (cachedData) showOfflineToast();
-                    else {
-                        allData = DUMMY_DATA;
-                        initApp();
-                    }
-                }
-            } else {
-                console.warn("No Valid API URL");
-                loadingEl.style.display = 'none';
-                if (!cachedData) {
-                    allData = DUMMY_DATA;
-                    initApp();
                 }
             }
         };
 
-        function showOfflineToast() {
-            const toast = document.getElementById('offline-toast');
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
-        }
-
         function initApp() {
+            // ✅ Loading Screen ကို သေချာပေါက် ပိတ်ပေးမယ့်နေရာ
+            document.getElementById('loading').style.display = 'none';
+            
             setupCategories();
             renderSongs(allData);
+            
             const savedSize = localStorage.getItem('fontSize') || 16;
             changeFontSize(savedSize);
             document.getElementById('font-slider').value = savedSize;
         }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            if (screenId === 'home-screen') historyStack = ['home-screen'];
-            else historyStack.push(screenId);
-        }
-
-        function goBack() {
-            if (historyStack.length > 1) {
-                historyStack.pop();
-                if (historyStack[historyStack.length - 1] === document.querySelector('.screen.active').id) {
-                     historyStack.pop();
-                }
-                let prevScreen = historyStack[historyStack.length - 1] || 'home-screen';
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.getElementById(prevScreen).classList.add('active');
-            } else {
-                showScreen('home-screen');
-            }
-        }
-
         function setupCategories() {
-            const categories = ['All', ...new Set(allData.map(item => item.category))];
+            // Space တွေကို ဖယ်ထုတ်ပြီး Category ယူမယ် (.trim သုံးထားသည်)
+            const categories = ['All', ...new Set(allData.map(item => item.category ? item.category.trim() : 'Other'))];
             const catContainer = document.getElementById('category-list');
             catContainer.innerHTML = '';
+            
             categories.forEach(cat => {
                 let chip = document.createElement('div');
                 chip.className = `category-chip ${cat === 'All' ? 'active' : ''}`;
@@ -304,8 +260,14 @@
         function filterCategory(category) {
             const searchVal = document.getElementById('search-input').value.toLowerCase();
             let filtered = allData;
-            if (category !== 'All') filtered = filtered.filter(item => item.category === category);
-            if (searchVal) filtered = filtered.filter(item => item.title.toLowerCase().includes(searchVal));
+            
+            if (category !== 'All') {
+                // Category စစ်တဲ့အခါ Space ဖယ်ပြီးစစ်မယ်
+                filtered = filtered.filter(item => item.category && item.category.trim() === category);
+            }
+            if (searchVal) {
+                filtered = filtered.filter(item => item.title.toLowerCase().includes(searchVal));
+            }
             renderSongs(filtered);
         }
 
@@ -322,6 +284,43 @@
             updateFavIcon(song.title);
             document.querySelector('.action-btn').setAttribute('data-id', song.title);
             showScreen('lyrics-screen');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if (screenId === 'home-screen') historyStack = ['home-screen'];
+            else historyStack.push(screenId);
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop();
+                if (historyStack[historyStack.length - 1] === document.querySelector('.screen.active').id) {
+                     historyStack.pop();
+                }
+                let prevScreen = historyStack[historyStack.length - 1] || 'home-screen';
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(prevScreen).classList.add('active');
+            } else {
+                showScreen('home-screen');
+            }
+        }
+
+        function changeFontSize(size) {
+            document.documentElement.style.setProperty('--lyrics-font-size', size + 'px');
+            document.getElementById('font-val').innerText = size + 'px';
+            localStorage.setItem('fontSize', size);
+        }
+
+        function copyLyrics() {
+            navigator.clipboard.writeText(currentLyrics).then(() => alert("Copied!"));
+        }
+
+        function shareLyrics() {
+            navigator.clipboard.writeText("https://t.me/ZomilabuBot").then(() => {
+                alert("Bot Link Copied!");
+            });
         }
 
         function showFavoritesScreen() {
@@ -343,22 +342,6 @@
                 list.appendChild(div);
             });
             showScreen('favorites-screen');
-        }
-
-        function changeFontSize(size) {
-            document.documentElement.style.setProperty('--lyrics-font-size', size + 'px');
-            document.getElementById('font-val').innerText = size + 'px';
-            localStorage.setItem('fontSize', size);
-        }
-
-        function copyLyrics() {
-            navigator.clipboard.writeText(currentLyrics).then(() => alert("Copied!"));
-        }
-
-        function shareLyrics() {
-            navigator.clipboard.writeText("https://t.me/ZomilabuBot").then(() => {
-                alert("Bot Link Copied!");
-            });
         }
 
         function updateFavIcon(id) {
@@ -383,6 +366,12 @@
             }
             localStorage.setItem('favs', JSON.stringify(favorites));
             updateFavIcon(id);
+        }
+
+        function showOfflineToast() {
+            const toast = document.getElementById('offline-toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
