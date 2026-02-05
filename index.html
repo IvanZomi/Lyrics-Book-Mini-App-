@@ -7,78 +7,50 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #2481cc;
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --secondary-bg: #f5f5f5;
-            --lyrics-font-size: 16px; 
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #1c1c1e;
-                --text-color: #ffffff;
-                --secondary-bg: #2c2c2e;
-            }
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-        }
-
+        :root { --primary-color: #2481cc; --bg-color: #ffffff; --text-color: #333333; --secondary-bg: #f5f5f5; --lyrics-font-size: 16px; }
+        @media (prefers-color-scheme: dark) { :root { --bg-color: #1c1c1e; --text-color: #ffffff; --secondary-bg: #2c2c2e; } }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; height: 100vh; overflow: hidden; user-select: none; }
+        
+        /* Layout & Screen */
         .screen { display: none; height: 100%; flex-direction: column; animation: fadeIn 0.3s ease; }
         .screen.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Components */
         .header { padding: 15px; background: var(--secondary-bg); display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header .icon-btn { background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 24px; display: flex; align-items: center; }
-
+        .icon-btn { background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 24px; display: flex; align-items: center; }
+        
         .search-container { padding: 10px; }
         .search-bar { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; background: var(--secondary-bg); color: var(--text-color); box-sizing: border-box; outline: none; }
-
+        
         .category-scroll { display: flex; overflow-x: auto; padding: 5px 10px; gap: 10px; scrollbar-width: none; }
-        .category-chip { padding: 8px 16px; background: var(--secondary-bg); border-radius: 20px; white-space: nowrap; font-size: 14px; cursor: pointer; border: 1px solid transparent; }
+        .category-chip { padding: 8px 16px; background: var(--secondary-bg); border-radius: 20px; white-space: nowrap; font-size: 14px; cursor: pointer; }
         .category-chip.active { background: var(--primary-color); color: white; }
-
+        
         .list-container { flex: 1; overflow-y: auto; padding: 10px; }
         .list-item { padding: 15px; border-bottom: 1px solid rgba(128, 128, 128, 0.2); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .list-item:active { background-color: rgba(0,0,0,0.05); }
-
+        
         .lyrics-content { flex: 1; padding: 20px; overflow-y: auto; white-space: pre-wrap; font-size: var(--lyrics-font-size); line-height: 1.8; text-align: center; user-select: text; }
-
+        
         .bottom-actions { display: flex; justify-content: space-around; padding: 15px; background: var(--secondary-bg); border-top: 1px solid rgba(0,0,0,0.1); }
-        .action-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: var(--text-color); cursor: pointer; font-size: 12px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: var(--text-color); font-size: 12px; }
         .action-btn span { font-size: 24px; margin-bottom: 4px; color: var(--primary-color); }
-
+        
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; background: var(--secondary-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 1000; }
-        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(50, 50, 50, 0.9); color: white; padding: 8px 20px; border-radius: 20px; font-size: 12px; z-index: 1000; display: none; }
-        .settings-content, .about-content { padding: 20px; }
+        .settings-content, .about-content { padding: 20px; text-align: center; }
         input[type=range] { width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div id="loading">Tawmvei ngak in...</div>
-    <div id="offline-toast" class="toast">Offline Mode</div>
 
     <div id="home-screen" class="screen">
         <div class="header">
             <span>Lamal Book</span>
             <div style="display: flex; gap: 10px;">
-                <button class="icon-btn" onclick="showFavoritesScreen()">
-                    <span class="material-icons" style="color: #ff4081;">favorite</span>
-                </button>
-                <button class="icon-btn" onclick="showScreen('settings-screen')">
-                    <span class="material-icons">settings</span>
-                </button>
+                <button class="icon-btn" onclick="showFavoritesScreen()"><span class="material-icons" style="color: #ff4081;">favorite</span></button>
+                <button class="icon-btn" onclick="showScreen('settings-screen')"><span class="material-icons">settings</span></button>
             </div>
         </div>
         <div class="search-container">
@@ -88,57 +60,35 @@
             <div class="category-chip active" onclick="filterCategory('All', this)">All</div>
         </div>
         <div class="list-container" id="song-list"></div>
-        <div style="text-align: center; padding: 10px; font-size: 12px; opacity: 0.6;" onclick="showScreen('about-screen')">About App</div>
+        <div style="padding: 10px; text-align: center; font-size: 12px; opacity: 0.6;" onclick="showScreen('about-screen')">About App</div>
     </div>
 
     <div id="lyrics-screen" class="screen">
         <div class="header">
-            <button class="icon-btn" onclick="goBack()">
-                <span class="material-icons">arrow_back</span>
-            </button>
-            <span id="playing-song-title" style="font-size: 16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 200px;">Song Title</span>
+            <button class="icon-btn" onclick="goBack()"><span class="material-icons">arrow_back</span></button>
+            <span id="playing-song-title" style="max-width: 200px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Song Title</span>
             <span style="width: 24px;"></span>
         </div>
-        <div class="lyrics-content" id="lyrics-text">Lyrics will appear here...</div>
+        <div class="lyrics-content" id="lyrics-text"></div>
         <div class="bottom-actions">
-            <button class="action-btn" onclick="toggleFavorite()">
-                <span class="material-icons" id="fav-icon">favorite_border</span>
-                Favorite
-            </button>
-            <button class="action-btn" onclick="copyLyrics()">
-                <span class="material-icons">content_copy</span>
-                Copy
-            </button>
-            <button class="action-btn" onclick="shareLyrics()">
-                <span class="material-icons">share</span>
-                Share
-            </button>
+            <button class="action-btn" onclick="toggleFavorite()"><span class="material-icons" id="fav-icon">favorite_border</span>Favorite</button>
+            <button class="action-btn" onclick="copyLyrics()"><span class="material-icons">content_copy</span>Copy</button>
+            <button class="action-btn" onclick="shareLyrics()"><span class="material-icons">share</span>Share</button>
         </div>
     </div>
 
     <div id="favorites-screen" class="screen">
         <div class="header">
-            <button class="icon-btn" onclick="showScreen('home-screen')">
-                <span class="material-icons">arrow_back</span>
-            </button>
+            <button class="icon-btn" onclick="showScreen('home-screen')"><span class="material-icons">arrow_back</span></button>
             <span>My Favorites</span>
             <span style="width: 24px;"></span>
         </div>
-        <div id="no-fav-msg" style="text-align: center; margin-top: 50px; display: none; color: #888;">
-            <span class="material-icons" style="font-size: 48px; color: #ddd;">favorite_border</span>
-            <p>No favorites yet!</p>
-        </div>
+        <div id="no-fav-msg" style="text-align: center; margin-top: 50px; display: none; color: #888;">No favorites yet!</div>
         <div class="list-container" id="fav-list"></div>
     </div>
 
     <div id="settings-screen" class="screen">
-        <div class="header">
-            <button class="icon-btn" onclick="showScreen('home-screen')">
-                <span class="material-icons">close</span>
-            </button>
-            <span>Settings</span>
-            <span style="width: 24px;"></span>
-        </div>
+        <div class="header"><button class="icon-btn" onclick="showScreen('home-screen')"><span class="material-icons">close</span></button><span>Settings</span><span style="width: 24px;"></span></div>
         <div class="settings-content">
             <h3>Text Size</h3>
             <input type="range" min="14" max="30" value="16" id="font-slider" oninput="changeFontSize(this.value)">
@@ -148,16 +98,10 @@
     </div>
 
     <div id="about-screen" class="screen">
-        <div class="header">
-            <button class="icon-btn" onclick="showScreen('home-screen')">
-                <span class="material-icons">close</span>
-            </button>
-            <span>About</span>
-            <span style="width: 24px;"></span>
-        </div>
-        <div class="about-content" style="text-align: center;">
-            <h2>Lyrics Mini App</h2>
-            <p>Version 1.3</p>
+        <div class="header"><button class="icon-btn" onclick="showScreen('home-screen')"><span class="material-icons">close</span></button><span>About</span><span style="width: 24px;"></span></div>
+        <div class="about-content">
+            <h2>Lamal Book App</h2>
+            <p>Version 2.0 (Clean)</p>
             <p>Developed with ❤️ by</p>
             <h3>Ivan Zomi</h3>
             <p>Late 150:1-6</p>
@@ -165,10 +109,10 @@
     </div>
 
     <script>
-        // =======================================================
-        // ✅ API URL ကို ထည့်ပြီးသားပါ (ဘာမှထပ်ပြင်စရာမလိုပါ)
-        // =======================================================
-        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbydcIxjZrQzRKJ6rubYpLa7b31G9eqrQ2sOQgSMukdJceLAqzXAMeW1sRJv_Xq1-JUw/exec"; 
+        // ====================================================
+        // 👇 အောက်က "" ကြားထဲမှာ LINK ထည့်ဖို့ မမေ့ပါနဲ့ 👇
+        // ====================================================
+        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxHGVrPdTBuz__dVhdQvQDmRXQ2FN6O0tUcGK4rGCV55K8ug4xakdTc0yR8z_PZ7wSwBg/exec"; 
         
         let allData = [];
         let historyStack = ['home-screen'];
@@ -176,202 +120,147 @@
         let favorites = JSON.parse(localStorage.getItem('favs')) || [];
 
         window.onload = async function() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.expand(); 
-            }
+            if (window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.expand();
 
-            // 1. Cache က Data ကို အရင်ပြထားမယ် (Offline အတွက်)
-            const cachedData = localStorage.getItem('offlineData');
-            if (cachedData) {
-                allData = JSON.parse(cachedData);
+            // Cache စစ်မယ်
+            const cached = localStorage.getItem('offlineData');
+            if (cached) {
+                allData = JSON.parse(cached);
                 initApp();
             }
 
-            // 2. အင်တာနက်ကနေ Data အသစ်ဆွဲမယ်
-            if (SHEET_API_URL) {
+            // API ဆွဲမယ်
+            if (SHEET_API_URL && SHEET_API_URL.startsWith('http')) {
                 try {
-                    const response = await fetch(SHEET_API_URL);
-                    const newData = await response.json();
-                    
-                    // JSON ရလာရင် Cache သိမ်းပြီး UI Update လုပ်မယ်
-                    if (newData && Array.isArray(newData)) {
-                        localStorage.setItem('offlineData', JSON.stringify(newData));
-                        allData = newData;
+                    const res = await fetch(SHEET_API_URL);
+                    const data = await res.json();
+                    if(data && Array.isArray(data)) {
+                        allData = data;
+                        localStorage.setItem('offlineData', JSON.stringify(data));
                         initApp();
-                    } 
-                } catch (e) {
-                    console.error("Network Error:", e);
-                    // Error တက်ရင် Loading ပိတ်မယ်
-                    document.getElementById('loading').style.display = 'none';
-                    if (cachedData) showOfflineToast();
-                }
+                    }
+                } catch (e) { console.log(e); }
             }
+            
+            // Loading ပိတ်မယ် (Data မရလည်း ပိတ်မယ်)
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                if(allData.length === 0 && !cached) alert("Data Omlo hi (API Link guang mah na hiam sit in)");
+            }, 3000); 
         };
 
         function initApp() {
-            // ✅ Loading Screen ကို သေချာပေါက် ပိတ်ပေးမယ့်နေရာ
             document.getElementById('loading').style.display = 'none';
-            
             setupCategories();
             renderSongs(allData);
-            
-            const savedSize = localStorage.getItem('fontSize') || 16;
-            changeFontSize(savedSize);
-            document.getElementById('font-slider').value = savedSize;
+            const size = localStorage.getItem('fontSize') || 16;
+            changeFontSize(size);
+            document.getElementById('font-slider').value = size;
         }
 
+        // --- Logic Functions ---
         function setupCategories() {
-            // Space တွေကို ဖယ်ထုတ်ပြီး Category ယူမယ် (.trim သုံးထားသည်)
-            const categories = ['All', ...new Set(allData.map(item => item.category ? item.category.trim() : 'Other'))];
-            const catContainer = document.getElementById('category-list');
-            catContainer.innerHTML = '';
-            
-            categories.forEach(cat => {
-                let chip = document.createElement('div');
-                chip.className = `category-chip ${cat === 'All' ? 'active' : ''}`;
-                chip.innerText = cat;
-                chip.onclick = function() {
-                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    filterCategory(cat);
+            const cats = ['All', ...new Set(allData.map(d => d.category ? d.category.trim() : 'Other'))];
+            const div = document.getElementById('category-list'); div.innerHTML = '';
+            cats.forEach(c => {
+                let el = document.createElement('div');
+                el.className = `category-chip ${c === 'All' ? 'active' : ''}`;
+                el.innerText = c;
+                el.onclick = () => {
+                    document.querySelectorAll('.category-chip').forEach(x => x.classList.remove('active'));
+                    el.classList.add('active');
+                    filterCategory(c);
                 };
-                catContainer.appendChild(chip);
+                div.appendChild(el);
             });
         }
 
-        function renderSongs(data) {
-            const list = document.getElementById('song-list');
-            list.innerHTML = '';
-            data.forEach(song => {
-                let div = document.createElement('div');
-                div.className = 'list-item';
-                div.innerHTML = `
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="font-weight:bold;">${song.title}</span>
-                        <span style="font-size:12px; color:#888;">${song.category}</span>
-                    </div>
-                    <span class="material-icons" style="font-size:16px; color:#ccc;">chevron_right</span>
-                `;
-                div.onclick = () => showLyrics(song);
-                list.appendChild(div);
+        function renderSongs(list) {
+            const div = document.getElementById('song-list'); div.innerHTML = '';
+            list.forEach(s => {
+                let el = document.createElement('div');
+                el.className = 'list-item';
+                el.innerHTML = `<div><b>${s.title}</b><div style="font-size:12px;color:#888">${s.category}</div></div><span class="material-icons" style="font-size:16px;color:#ccc">chevron_right</span>`;
+                el.onclick = () => showLyrics(s);
+                div.appendChild(el);
             });
         }
 
-        function filterCategory(category) {
-            const searchVal = document.getElementById('search-input').value.toLowerCase();
-            let filtered = allData;
-            
-            if (category !== 'All') {
-                // Category စစ်တဲ့အခါ Space ဖယ်ပြီးစစ်မယ်
-                filtered = filtered.filter(item => item.category && item.category.trim() === category);
-            }
-            if (searchVal) {
-                filtered = filtered.filter(item => item.title.toLowerCase().includes(searchVal));
-            }
-            renderSongs(filtered);
+        function filterCategory(cat) {
+            const term = document.getElementById('search-input').value.toLowerCase();
+            let res = allData;
+            if (cat !== 'All') res = res.filter(d => d.category && d.category.trim() === cat);
+            if (term) res = res.filter(d => d.title.toLowerCase().includes(term));
+            renderSongs(res);
         }
-
+        
         function filterSongs() {
-            const activeChip = document.querySelector('.category-chip.active');
-            const activeCat = activeChip ? activeChip.innerText : 'All';
-            filterCategory(activeCat);
+            const active = document.querySelector('.category-chip.active').innerText;
+            filterCategory(active);
         }
 
-        function showLyrics(song) {
-            document.getElementById('playing-song-title').innerText = song.title;
-            document.getElementById('lyrics-text').innerText = song.lyrics;
-            currentLyrics = song.lyrics;
-            updateFavIcon(song.title);
-            document.querySelector('.action-btn').setAttribute('data-id', song.title);
+        function showLyrics(s) {
+            document.getElementById('playing-song-title').innerText = s.title;
+            document.getElementById('lyrics-text').innerText = s.lyrics;
+            currentLyrics = s.lyrics;
+            document.querySelector('.action-btn').setAttribute('data-id', s.title);
+            updateFavIcon(s.title);
             showScreen('lyrics-screen');
         }
 
-        function showScreen(screenId) {
+        // --- Navigation ---
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            if (screenId === 'home-screen') historyStack = ['home-screen'];
-            else historyStack.push(screenId);
+            document.getElementById(id).classList.add('active');
+            if(id === 'home-screen') historyStack = ['home-screen'];
+            else historyStack.push(id);
         }
 
         function goBack() {
             if (historyStack.length > 1) {
                 historyStack.pop();
-                if (historyStack[historyStack.length - 1] === document.querySelector('.screen.active').id) {
-                     historyStack.pop();
-                }
-                let prevScreen = historyStack[historyStack.length - 1] || 'home-screen';
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.getElementById(prevScreen).classList.add('active');
-            } else {
-                showScreen('home-screen');
-            }
+                if(historyStack[historyStack.length-1] === document.querySelector('.screen.active').id) historyStack.pop();
+                showScreen(historyStack[historyStack.length-1] || 'home-screen');
+            } else showScreen('home-screen');
         }
 
-        function changeFontSize(size) {
-            document.documentElement.style.setProperty('--lyrics-font-size', size + 'px');
-            document.getElementById('font-val').innerText = size + 'px';
-            localStorage.setItem('fontSize', size);
+        // --- Utilities ---
+        function changeFontSize(s) {
+            document.documentElement.style.setProperty('--lyrics-font-size', s + 'px');
+            document.getElementById('font-val').innerText = s + 'px';
+            localStorage.setItem('fontSize', s);
         }
+        function copyLyrics() { navigator.clipboard.writeText(currentLyrics).then(()=>alert("Copied!")); }
+        function shareLyrics() { navigator.clipboard.writeText("https://t.me/ZomilabuBot").then(()=>alert("Link Copied!")); }
 
-        function copyLyrics() {
-            navigator.clipboard.writeText(currentLyrics).then(() => alert("Copied!"));
-        }
-
-        function shareLyrics() {
-            navigator.clipboard.writeText("https://t.me/ZomilabuBot").then(() => {
-                alert("Bot Link Copied!");
-            });
-        }
-
+        // --- Favorites ---
         function showFavoritesScreen() {
             favorites = JSON.parse(localStorage.getItem('favs')) || [];
-            const favSongs = allData.filter(song => favorites.includes(song.title));
-            const list = document.getElementById('fav-list');
-            list.innerHTML = '';
-            document.getElementById('no-fav-msg').style.display = favSongs.length ? 'none' : 'block';
-            favSongs.forEach(song => {
-                let div = document.createElement('div');
-                div.className = 'list-item';
-                div.innerHTML = `
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="font-weight:bold;">${song.title}</span>
-                    </div>
-                    <span class="material-icons" style="color: #ff4081;">favorite</span>
-                `;
-                div.onclick = () => showLyrics(song);
-                list.appendChild(div);
+            const list = allData.filter(d => favorites.includes(d.title));
+            const div = document.getElementById('fav-list'); div.innerHTML = '';
+            document.getElementById('no-fav-msg').style.display = list.length ? 'none' : 'block';
+            list.forEach(s => {
+                let el = document.createElement('div');
+                el.className = 'list-item';
+                el.innerHTML = `<b>${s.title}</b><span class="material-icons" style="color:#ff4081">favorite</span>`;
+                el.onclick = () => showLyrics(s);
+                div.appendChild(el);
             });
             showScreen('favorites-screen');
         }
-
         function updateFavIcon(id) {
             const icon = document.getElementById('fav-icon');
             favorites = JSON.parse(localStorage.getItem('favs')) || [];
-            if (favorites.includes(id)) {
-                icon.innerText = "favorite";
-                icon.style.color = "#ff4081";
-            } else {
-                icon.innerText = "favorite_border";
-                icon.style.color = "var(--text-color)";
-            }
+            icon.innerText = favorites.includes(id) ? "favorite" : "favorite_border";
+            icon.style.color = favorites.includes(id) ? "#ff4081" : "var(--text-color)";
         }
-
         function toggleFavorite() {
             const id = document.querySelector('.action-btn').getAttribute('data-id');
             favorites = JSON.parse(localStorage.getItem('favs')) || [];
-            if (favorites.includes(id)) {
-                favorites = favorites.filter(fav => fav !== id);
-            } else {
-                favorites.push(id);
-            }
+            if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+            else favorites.push(id);
             localStorage.setItem('favs', JSON.stringify(favorites));
             updateFavIcon(id);
-        }
-
-        function showOfflineToast() {
-            const toast = document.getElementById('offline-toast');
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
